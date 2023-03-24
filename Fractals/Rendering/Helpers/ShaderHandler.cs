@@ -1,16 +1,19 @@
 ﻿using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 
 namespace Fractals.Rendering.Helpers;
 
-public sealed class ShaderHandler : IDisposable
-{
-    public ShaderHandler(string vertexShaderSource, string fragmentShaderSource)
-    {
-        _vertShaderHandle = CreateShaderObject(ShaderType.VertexShader, vertexShaderSource);
-        _fragShaderHandle = CreateShaderObject(ShaderType.FragmentShader, fragmentShaderSource);
+public sealed class ShaderHandler : IDisposable {
+    public ShaderHandler(string vertexShaderCode, string fragmentShaderCode) {
+        _vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
+        GL.ShaderSource(_vertShaderHandle, vertexShaderCode);
+        GL.CompileShader(_vertShaderHandle);
+
+        _fragShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
+        GL.ShaderSource(_fragShaderHandle, fragmentShaderCode);
+        GL.CompileShader(_fragShaderHandle);
 
         Handle = GL.CreateProgram();
+
         GL.AttachShader(Handle, _vertShaderHandle);
         GL.AttachShader(Handle, _fragShaderHandle);
 
@@ -18,6 +21,7 @@ public sealed class ShaderHandler : IDisposable
 
         GL.DetachShader(Handle, _vertShaderHandle);
         GL.DetachShader(Handle, _fragShaderHandle);
+
         GL.DeleteShader(_vertShaderHandle);
         GL.DeleteShader(_fragShaderHandle);
     }
@@ -29,48 +33,31 @@ public sealed class ShaderHandler : IDisposable
     private bool disposed;
 
 
-    public void Uniform(string name, double value)
-    {
-        int location = GL.GetUniformLocation(Handle, name);
-        GL.Uniform1(location, value);
+    public void Uniform(string name, int a) {
+        GL.Uniform1(GL.GetUniformLocation(Handle, name), a);
     }
 
-    public void Uniform(string name, double a, double b)
-    {
-        int location = GL.GetUniformLocation(Handle, name);
-        GL.Uniform2(location, a, b);
+    public void Uniform(string name, double a) {
+        GL.Uniform1(GL.GetUniformLocation(Handle, name), a);
     }
 
-    public void Uniform(string name, double a, double b, double c)
-    {
-        int location = GL.GetUniformLocation(Handle, name);
-        GL.Uniform3(location, a, b, c);
+    public void Uniform(string name, double a, double b) {
+        GL.Uniform2(GL.GetUniformLocation(Handle, name), a, b);
     }
 
-    public void Uniform(string name, double a, double b, double c, double d)
-    {
-        int location = GL.GetUniformLocation(Handle, name);
-        GL.Uniform4(location, a, b, c, d);
+    public void Uniform(string name, double a, double b, double c) {
+        GL.Uniform3(GL.GetUniformLocation(Handle, name), a, b, c);
     }
 
-    private int CreateShaderObject(ShaderType shaderType, string shaderSource)
-    {
-        int shaderObjectId = GL.CreateShader(shaderType);
-        GL.ShaderSource(shaderObjectId, shaderSource);
-        GL.CompileShader(shaderObjectId);
-
-        //Console.WriteLine(GL.GetShaderInfoLog(shaderObjectId));
-
-        return shaderObjectId;
+    public void Uniform(string name, double a, double b, double c, double d) {
+        GL.Uniform4(GL.GetUniformLocation(Handle, name), a, b, c, d);
     }
 
-    ~ShaderHandler()
-    {
+    ~ShaderHandler() {
         Dispose();
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         if (disposed) return;
 
         GL.DeleteProgram(Handle);

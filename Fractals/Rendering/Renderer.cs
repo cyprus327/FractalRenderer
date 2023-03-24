@@ -1,6 +1,8 @@
 ﻿using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenTK.Graphics.OpenGL4;
+using System.Reflection;
+using OpenTK.Mathematics;
 
 namespace Fractals.Rendering;
 internal sealed class Renderer : GameWindow {
@@ -16,8 +18,6 @@ internal sealed class Renderer : GameWindow {
         _windowTitle = title;
     }
 
-    public Color BackgroundColor { get; set; } = Color.FromArgb(80, 80, 80);
-
     private int vertexArrayHandle;
     private int vertexBufferHandle;
     private int indexBufferHandle;
@@ -25,9 +25,10 @@ internal sealed class Renderer : GameWindow {
 
     private readonly string _windowTitle;
 
-    private int zoomUniformLocation, centerUniformLocation;
+    private int zoomUniformLocation, centerUniformLocation, maxIterUniformLocation;
     private double zoomLevel = 1.1d;
     private double centerX = 0d, centerY = 0d;
+    private int maxIterations = 1000;
 
     protected override void OnLoad() {
         base.OnLoad();
@@ -82,15 +83,10 @@ internal sealed class Renderer : GameWindow {
         string fragmentShaderCode = @"
             #version 410
 
-            precision highp float;
-
-            #define MAX_ITER 1000
-
             uniform double Zoom;
             uniform dvec2 Center;
             uniform vec2 Resolution;
-
-            in vec4 vColor;
+            uniform int MaxIter;
 
             out vec4 fragColor;
 
@@ -100,12 +96,12 @@ internal sealed class Renderer : GameWindow {
                 dvec2 z = dvec2(0.0, 0.0);
     
                 int iter = 0;
-                while (iter < MAX_ITER && dot(z, z) < 4.0) {
+                while (iter < MaxIter && dot(z, z) < 4.0) { // maybe replace dot with z.x < 2.0 && z.y < 2.0
                     z = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + uv;
                     iter++;
                 }
     
-                float t = float(iter) / float(MAX_ITER);
+                float t = float(iter) / float(MaxIter);
                 fragColor = vec4(
                     9.5 * (1.0 - t) * (1.0 - t) * (1.0 - t) * t,
                     15.0 * (1.0 - t) * (1.0 - t) * t * t,
@@ -122,6 +118,11 @@ internal sealed class Renderer : GameWindow {
         int fragShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragShaderHandle, fragmentShaderCode);
         GL.CompileShader(fragShaderHandle);
+
+        string fragShaderInfoLog = GL.GetShaderInfoLog(fragShaderHandle);
+        if (fragShaderInfoLog != string.Empty) {
+            Console.WriteLine(fragShaderInfoLog);
+        }
 
         shaderProgramHandle = GL.CreateProgram();
 
@@ -149,6 +150,9 @@ internal sealed class Renderer : GameWindow {
 
         centerUniformLocation = GL.GetUniformLocation(this.shaderProgramHandle, "Center");
         GL.Uniform2(centerUniformLocation, centerX, centerY);
+
+        maxIterUniformLocation = GL.GetUniformLocation(shaderProgramHandle, "MaxIter");
+        GL.Uniform1(maxIterUniformLocation, maxIterations);
     }
 
     protected override void OnUnload() {
@@ -195,6 +199,8 @@ internal sealed class Renderer : GameWindow {
             zoomLevel *= Math.Pow(2, args.Time);
         else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Q))
             zoomLevel *= Math.Pow(0.5, args.Time);
+        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R)) 
+            zoomLevel = 1f;
 
         if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
             centerY += args.Time / zoomLevel;
@@ -205,13 +211,18 @@ internal sealed class Renderer : GameWindow {
         else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D))
             centerX += args.Time / zoomLevel;
 
-        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R)) 
-            zoomLevel = 1f;
+        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Z))
+            maxIterations -= (int)(args.Time * maxIterations);
+        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.X))
+            maxIterations += (int)(args.Time * maxIterations);
+
+        maxIterations = Math.Max(400, Math.Min(20000, maxIterations));
 
         GL.Uniform1(zoomUniformLocation, zoomLevel);
         GL.Uniform2(centerUniformLocation, centerX, centerY);
+        GL.Uniform1(maxIterUniformLocation, maxIterations);
 
-        this.Title = $"{_windowTitle} | FPS: {1 / args.Time:F0}";
+        this.Title = $"{_windowTitle} | Iterations: {maxIterations}, FPS: {1 / args.Time:F0}";
     }
 }
 
