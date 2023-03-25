@@ -1,5 +1,4 @@
 # Fractals
 
-### Example zoom in videos:
-https://streamable.com/dt9cdq
-https://streamable.com/k17dvh
+### Example video of a Mandelbrot zoom and messing around with Julia constants
+https://streamable.com/jaijdj
