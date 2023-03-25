@@ -4,66 +4,26 @@ namespace Fractals.Rendering;
 
 internal sealed class Julia : Fractal {
     public Julia(int width, int height, bool showLogs = false) {
-        int vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertShaderHandle, Shaders.VertexCode);
-        GL.CompileShader(vertShaderHandle);
-
-        if (showLogs) {
-            string vertShaderInfoLog = GL.GetShaderInfoLog(vertShaderHandle);
-            if (vertShaderInfoLog != string.Empty) {
-                Console.WriteLine(vertShaderInfoLog);
-            }
-        }
-
-        int fragShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragShaderHandle, Shaders.JuliaFragCode);
-        GL.CompileShader(fragShaderHandle);
-
-        if (showLogs) {
-            string fragShaderInfoLog = GL.GetShaderInfoLog(fragShaderHandle);
-            if (fragShaderInfoLog != string.Empty) {
-                Console.WriteLine(fragShaderInfoLog);
-            }
-        }
-
-        GL.UseProgram(0);
-        Handle = GL.CreateProgram();
-
-        GL.AttachShader(Handle, vertShaderHandle);
-        GL.AttachShader(Handle, fragShaderHandle);
-
-        GL.LinkProgram(Handle);
-
-        GL.DetachShader(Handle, vertShaderHandle);
-        GL.DetachShader(Handle, fragShaderHandle);
-
-        GL.DeleteShader(vertShaderHandle);
-        GL.DeleteShader(fragShaderHandle);
-
-        GL.UseProgram(Handle);
+        Initialize(Shaders.JuliaFragCode, out int handle, showLogs, true);
+        Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");
         GL.Uniform2(viewportLocation, (float)width, (float)height);
 
-        ZoomUniformLocation = GL.GetUniformLocation(Handle, "Zoom");
-        GL.Uniform1(ZoomUniformLocation, ZoomLevel);
+        zoomUniformLocation = GL.GetUniformLocation(Handle, "Zoom");
+        GL.Uniform1(zoomUniformLocation, ZoomLevel);
 
-        CenterUniformLocation = GL.GetUniformLocation(Handle, "Center");
-        GL.Uniform2(CenterUniformLocation, CenterX, CenterY);
+        centerUniformLocation = GL.GetUniformLocation(Handle, "Center");
+        GL.Uniform2(centerUniformLocation, CenterX, CenterY);
 
-        MaxIterUniformLocation = GL.GetUniformLocation(Handle, "MaxIter");
-        GL.Uniform1(MaxIterUniformLocation, MaxIterations);
+        maxIterUniformLocation = GL.GetUniformLocation(Handle, "MaxIter");
+        GL.Uniform1(maxIterUniformLocation, MaxIterations);
 
-        ConstantUniformLocation = GL.GetUniformLocation(Handle, "Constant");
-        GL.Uniform2(ConstantUniformLocation, ConstantR, ConstantI);
+        constantUniformLocation = GL.GetUniformLocation(Handle, "Constant");
+        GL.Uniform2(constantUniformLocation, ConstantR, ConstantI);
     }
 
     public override int Handle { get; init; }
-
-    public int ZoomUniformLocation { get; init; }
-    public int CenterUniformLocation { get; init; }
-    public int MaxIterUniformLocation { get; init; }
-    public int ConstantUniformLocation { get; init; }
 
     public double ZoomLevel { get; set; } = 0.5d;
     public double ConstantR { get; set; } = -0.78;
@@ -71,6 +31,11 @@ internal sealed class Julia : Fractal {
     public double CenterX { get; set; } = -0.0028050215194;
     public double CenterY { get; set; } = 0.003064073756579d;
     public int MaxIterations { get; set; } = 1000;
+    
+    private readonly int zoomUniformLocation;
+    private readonly int centerUniformLocation;
+    private readonly int maxIterUniformLocation;
+    private readonly int constantUniformLocation;
 
     public override void HandleInput(double deltaTime, OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState keyboardState) {
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.E))
@@ -105,9 +70,9 @@ internal sealed class Julia : Fractal {
 
         MaxIterations = Math.Max(400, Math.Min(20000, MaxIterations));
 
-        GL.Uniform1(ZoomUniformLocation, ZoomLevel);
-        GL.Uniform2(CenterUniformLocation, CenterX, CenterY);
-        GL.Uniform1(MaxIterUniformLocation, MaxIterations);
-        GL.Uniform2(ConstantUniformLocation, ConstantR, ConstantI);
+        GL.Uniform1(zoomUniformLocation, ZoomLevel);
+        GL.Uniform2(centerUniformLocation, CenterX, CenterY);
+        GL.Uniform1(maxIterUniformLocation, MaxIterations);
+        GL.Uniform2(constantUniformLocation, ConstantR, ConstantI);
     }
 }

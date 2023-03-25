@@ -28,6 +28,7 @@ internal sealed class Renderer : GameWindow {
     private Fractal currentFractal;
     private Mandelbrot mandelbrot;
     private Julia julia;
+    private BurningShip multibrot;
 
     private readonly string _windowTitle;
 
@@ -70,8 +71,9 @@ internal sealed class Renderer : GameWindow {
 
         mandelbrot = new Mandelbrot(this.ClientSize.X, this.ClientSize.Y, true);
         julia = new Julia(this.ClientSize.X, this.ClientSize.Y, true);
+        multibrot = new BurningShip(this.ClientSize.X, this.ClientSize.Y, true);
 
-        currentFractal = julia;
+        currentFractal = multibrot;
     }
 
     protected override void OnUnload() {
@@ -88,6 +90,7 @@ internal sealed class Renderer : GameWindow {
 
         mandelbrot?.Dispose();
         julia?.Dispose();
+        multibrot?.Dispose();
     }
 
     protected override void OnResize(ResizeEventArgs e) {
@@ -116,23 +119,13 @@ internal sealed class Renderer : GameWindow {
 
         string iter = "", coords = "", fps = $"FPS: {1 / args.Time:F0}";
 
-        switch (currentFractal) {
-            case Mandelbrot:
-                mandelbrot.HandleInput(args.Time, keyboardState);
-                iter = $"Iterations: {mandelbrot.MaxIterations}";
-                coords = $"Coords: ({mandelbrot.CenterX:F16}, {mandelbrot.CenterY:F16})";
-                break;
-            case Julia:
-                julia.HandleInput(args.Time, keyboardState);
-                iter = $"Iterations: {julia.MaxIterations}";
-                coords = $"Coords: ({julia.CenterX:F16}, {julia.CenterY:F16})";
-                break;
-        }
+        currentFractal.HandleInput(args.Time, this.KeyboardState);
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D1)) currentFractal = mandelbrot;
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D2)) currentFractal = julia;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D3)) currentFractal = multibrot;
 
-        this.Title = $"{_windowTitle} | {iter}, {coords} | {fps}";
+        this.Title = $"{currentFractal.GetType().Name} | {iter}, {coords} | {fps}";
     }
 }
 
