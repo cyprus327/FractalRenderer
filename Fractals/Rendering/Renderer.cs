@@ -5,6 +5,7 @@ using System.Reflection;
 using OpenTK.Mathematics;
 
 namespace Fractals.Rendering;
+
 internal sealed class Renderer : GameWindow {
     public Renderer(int width, int height, string title) :
         base(GameWindowSettings.Default,
@@ -12,7 +13,9 @@ internal sealed class Renderer : GameWindow {
             Size = (width, height),
             Title = title,
             StartVisible = false,
-            StartFocused = true
+            StartFocused = true,
+            MaximumSize = (width, height),
+            MinimumSize = (width, height)
         }) {
         this.CenterWindow();
         _windowTitle = title;
@@ -21,14 +24,13 @@ internal sealed class Renderer : GameWindow {
     private int vertexArrayHandle;
     private int vertexBufferHandle;
     private int indexBufferHandle;
-    private int shaderProgramHandle;
+
+    private Fractal currentFractal;
+    private Mandelbrot mandelbrot;
+    private Julia julia;
 
     private readonly string _windowTitle;
 
-    private int zoomUniformLocation, centerUniformLocation, maxIterUniformLocation;
-    private double zoomLevel = 1.1d;
-    private double centerX = 0d, centerY = 0d;
-    private int maxIterations = 1000;
 
     protected override void OnLoad() {
         base.OnLoad();
@@ -66,93 +68,10 @@ internal sealed class Renderer : GameWindow {
 
         GL.BindVertexArray(0);
 
-        string vertexShaderCode = @"
-            #version 410
-        
-            uniform vec2 ViewportSize;
+        mandelbrot = new Mandelbrot(this.ClientSize.X, this.ClientSize.Y, true);
+        julia = new Julia(this.ClientSize.X, this.ClientSize.Y, true);
 
-            layout (location = 0) in vec2 aPosition;
-
-            void main() {
-                float nx = aPosition.x / ViewportSize.x * 2 - 1;
-                float ny = aPosition.y / ViewportSize.y * 2 - 1;
-                gl_Position = vec4(nx, ny, 0, 1);
-            }
-        ";
-
-        string fragmentShaderCode = @"
-            #version 410
-
-            uniform double Zoom;
-            uniform dvec2 Center;
-            uniform vec2 Resolution;
-            uniform int MaxIter;
-
-            out vec4 fragColor;
-
-            void main() {
-                dvec2 uv = (gl_FragCoord.xy - dvec2(Resolution.x / 2.0, Resolution.y / 2.0)) / Resolution.y / Zoom + Center;
-    
-                dvec2 z = dvec2(0.0, 0.0);
-    
-                int iter = 0;
-                while (iter < MaxIter && dot(z, z) < 4.0) { // maybe replace dot with z.x < 2.0 && z.y < 2.0
-                    z = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + uv;
-                    iter++;
-                }
-    
-                float t = float(iter) / float(MaxIter);
-                fragColor = vec4(
-                    9.5 * (1.0 - t) * (1.0 - t) * (1.0 - t) * t,
-                    15.0 * (1.0 - t) * (1.0 - t) * t * t,
-                    8.0 * (1.0 - t) * t * t * t, 
-                    1.0
-                );
-            }
-        ";
-
-        int vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertShaderHandle, vertexShaderCode);
-        GL.CompileShader(vertShaderHandle);
-
-        int fragShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragShaderHandle, fragmentShaderCode);
-        GL.CompileShader(fragShaderHandle);
-
-        string fragShaderInfoLog = GL.GetShaderInfoLog(fragShaderHandle);
-        if (fragShaderInfoLog != string.Empty) {
-            Console.WriteLine(fragShaderInfoLog);
-        }
-
-        shaderProgramHandle = GL.CreateProgram();
-
-        GL.AttachShader(shaderProgramHandle, vertShaderHandle);
-        GL.AttachShader(shaderProgramHandle, fragShaderHandle);
-
-        GL.LinkProgram(shaderProgramHandle);
-
-        GL.DetachShader(shaderProgramHandle, vertShaderHandle);
-        GL.DetachShader(shaderProgramHandle, fragShaderHandle);
-
-        GL.DeleteShader(vertShaderHandle);
-        GL.DeleteShader(fragShaderHandle);
-
-        GL.UseProgram(shaderProgramHandle);
-
-        int viewportLocation = GL.GetUniformLocation(shaderProgramHandle, "ViewportSize");
-        GL.Uniform2(viewportLocation, (float)this.ClientSize.X, (float)this.ClientSize.Y);
-
-        int resolutionLocation = GL.GetUniformLocation(this.shaderProgramHandle, "Resolution");
-        GL.Uniform2(resolutionLocation, (float)this.ClientSize.X, (float)this.ClientSize.Y);
-
-        zoomUniformLocation = GL.GetUniformLocation(this.shaderProgramHandle, "Zoom");
-        GL.Uniform1(zoomUniformLocation, zoomLevel);
-
-        centerUniformLocation = GL.GetUniformLocation(this.shaderProgramHandle, "Center");
-        GL.Uniform2(centerUniformLocation, centerX, centerY);
-
-        maxIterUniformLocation = GL.GetUniformLocation(shaderProgramHandle, "MaxIter");
-        GL.Uniform1(maxIterUniformLocation, maxIterations);
+        currentFractal = julia;
     }
 
     protected override void OnUnload() {
@@ -167,8 +86,8 @@ internal sealed class Renderer : GameWindow {
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         GL.DeleteBuffer(vertexBufferHandle);
 
-        GL.UseProgram(0);
-        GL.DeleteProgram(shaderProgramHandle);
+        mandelbrot?.Dispose();
+        julia?.Dispose();
     }
 
     protected override void OnResize(ResizeEventArgs e) {
@@ -182,7 +101,7 @@ internal sealed class Renderer : GameWindow {
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        GL.UseProgram(shaderProgramHandle);
+        GL.UseProgram(currentFractal.Handle);
         GL.BindVertexArray(vertexArrayHandle);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferHandle);
         GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
@@ -193,36 +112,27 @@ internal sealed class Renderer : GameWindow {
     protected override void OnUpdateFrame(FrameEventArgs args) {
         base.OnUpdateFrame(args);
 
-        var input = this.KeyboardState;
+        var keyboardState = this.KeyboardState;
 
-        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.E))
-            zoomLevel *= Math.Pow(2, args.Time);
-        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Q))
-            zoomLevel *= Math.Pow(0.5, args.Time);
-        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R)) 
-            zoomLevel = 1f;
+        string iter = "", coords = "", fps = $"FPS: {1 / args.Time:F0}";
 
-        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
-            centerY += args.Time / zoomLevel;
-        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.S))
-            centerY -= args.Time / zoomLevel;
-        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.A))
-            centerX -= args.Time / zoomLevel;
-        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D))
-            centerX += args.Time / zoomLevel;
+        switch (currentFractal) {
+            case Mandelbrot:
+                mandelbrot.HandleInput(args.Time, keyboardState);
+                iter = $"Iterations: {mandelbrot.MaxIterations}";
+                coords = $"Coords: ({mandelbrot.CenterX:F16}, {mandelbrot.CenterY:F16})";
+                break;
+            case Julia:
+                julia.HandleInput(args.Time, keyboardState);
+                iter = $"Iterations: {julia.MaxIterations}";
+                coords = $"Coords: ({julia.CenterX:F16}, {julia.CenterY:F16})";
+                break;
+        }
 
-        if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Z))
-            maxIterations -= (int)(args.Time * maxIterations);
-        else if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.X))
-            maxIterations += (int)(args.Time * maxIterations);
+        if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D1)) currentFractal = mandelbrot;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D2)) currentFractal = julia;
 
-        maxIterations = Math.Max(400, Math.Min(20000, maxIterations));
-
-        GL.Uniform1(zoomUniformLocation, zoomLevel);
-        GL.Uniform2(centerUniformLocation, centerX, centerY);
-        GL.Uniform1(maxIterUniformLocation, maxIterations);
-
-        this.Title = $"{_windowTitle} | Iterations: {maxIterations}, FPS: {1 / args.Time:F0}";
+        this.Title = $"{_windowTitle} | {iter}, {coords} | {fps}";
     }
 }
 

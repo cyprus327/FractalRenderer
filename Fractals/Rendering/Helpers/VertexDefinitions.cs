@@ -2,10 +2,8 @@
 
 namespace Fractals.Rendering.Helpers;
 
-public readonly struct VertexAttrib
-{
-    public VertexAttrib(string name, int index, int componentCount, int offset)
-    {
+public readonly struct VertexAttrib {
+    public VertexAttrib(string name, int index, int componentCount, int offset) {
         Name = name;
         Index = index;
         ComponentCount = componentCount;
@@ -18,16 +16,13 @@ public readonly struct VertexAttrib
     public readonly int Offset;
 }
 
-public sealed class VertexInfo
-{
-    public VertexInfo(Type type, params VertexAttrib[] attributes)
-    {
+public sealed class VertexInfo {
+    public VertexInfo(Type type, params VertexAttrib[] attributes) {
         Type = type;
         SizeInBytes = 0;
         VertexAttributes = attributes;
 
-        for (int i = 0; i < VertexAttributes.Length; i++)
-        {
+        for (int i = 0; i < VertexAttributes.Length; i++) {
             SizeInBytes += VertexAttributes[i].ComponentCount * sizeof(float);
         }
     }
@@ -37,10 +32,20 @@ public sealed class VertexInfo
     public readonly VertexAttrib[] VertexAttributes;
 }
 
-public readonly struct VertexPosCol
-{
-    public VertexPosCol(Vector2 pos, Color4 col)
-    {
+public readonly struct VertexPos {
+    public VertexPos(Vector2 pos) {
+        Position = pos;
+    }
+
+    public readonly Vector2 Position;
+
+    public static readonly VertexInfo Info = new VertexInfo(typeof(VertexPos),
+        new VertexAttrib("Position", 0, 2, 0)
+    );
+}
+
+public readonly struct VertexPosCol {
+    public VertexPosCol(Vector2 pos, Color4 col) {
         Position = pos;
         Color = col;
     }
@@ -54,10 +59,8 @@ public readonly struct VertexPosCol
     );
 }
 
-public readonly struct VertexPosTex
-{
-    public VertexPosTex(Vector2 pos, Vector2 tex)
-    {
+public readonly struct VertexPosTex {
+    public VertexPosTex(Vector2 pos, Vector2 tex) {
         Position = pos;
         TexCoord = tex;
     }
