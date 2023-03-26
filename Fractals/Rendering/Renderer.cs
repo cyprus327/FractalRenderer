@@ -18,7 +18,6 @@ internal sealed class Renderer : GameWindow {
             MinimumSize = (width, height)
         }) {
         this.CenterWindow();
-        _windowTitle = title;
     }
 
     private int vertexArrayHandle;
@@ -28,10 +27,8 @@ internal sealed class Renderer : GameWindow {
     private Fractal currentFractal;
     private Mandelbrot mandelbrot;
     private Julia julia;
-    private BurningShip multibrot;
-
-    private readonly string _windowTitle;
-
+    private BurningShip burningShip;
+    private Multibrot multibrot;
 
     protected override void OnLoad() {
         base.OnLoad();
@@ -71,7 +68,8 @@ internal sealed class Renderer : GameWindow {
 
         mandelbrot = new Mandelbrot(this.ClientSize.X, this.ClientSize.Y, true);
         julia = new Julia(this.ClientSize.X, this.ClientSize.Y, true);
-        multibrot = new BurningShip(this.ClientSize.X, this.ClientSize.Y, true);
+        burningShip = new BurningShip(this.ClientSize.X, this.ClientSize.Y, true);
+        multibrot = new Multibrot(this.ClientSize.X, this.ClientSize.Y, true);
 
         currentFractal = multibrot;
     }
@@ -90,7 +88,7 @@ internal sealed class Renderer : GameWindow {
 
         mandelbrot?.Dispose();
         julia?.Dispose();
-        multibrot?.Dispose();
+        burningShip?.Dispose();
     }
 
     protected override void OnResize(ResizeEventArgs e) {
@@ -117,15 +115,15 @@ internal sealed class Renderer : GameWindow {
 
         var keyboardState = this.KeyboardState;
 
-        string iter = "", coords = "", fps = $"FPS: {1 / args.Time:F0}";
-
         currentFractal.HandleInput(args.Time, this.KeyboardState);
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D1)) currentFractal = mandelbrot;
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D2)) currentFractal = julia;
-        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D3)) currentFractal = multibrot;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D3)) currentFractal = burningShip;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D4)) currentFractal = multibrot;
 
-        this.Title = $"{currentFractal.GetType().Name} | {iter}, {coords} | {fps}";
+        string fps = $"FPS: {1 / args.Time:F0}";
+        this.Title = $"{currentFractal.GetType().Name} | {currentFractal.Info} | {fps}";
     }
 }
 

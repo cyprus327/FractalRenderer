@@ -21,7 +21,8 @@ internal sealed class BurningShip : Fractal {
     }
 
     public override int Handle { get; init; }
-    
+    public override string Info { get => $"I: {MaxIterations}, P: ({CenterX:F16}, {CenterY:F16}), Z: {ZoomLevel:F4}"; }
+
     public double ZoomLevel { get; set; } = 0.5d;
     public double CenterX { get; set; } = -1d;
     public double CenterY { get; set; } = 0d;

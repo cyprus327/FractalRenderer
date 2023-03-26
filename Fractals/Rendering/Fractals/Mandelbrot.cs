@@ -18,9 +18,12 @@ internal sealed class Mandelbrot : Fractal {
 
         maxIterUniformLocation = GL.GetUniformLocation(Handle, "MaxIter");
         GL.Uniform1(maxIterUniformLocation, MaxIterations);
+
+
     }
 
     public override int Handle { get; init; }
+    public override string Info { get => $"I: {MaxIterations}, P: ({CenterX:F16}, {CenterY:F16}), Z: {ZoomLevel:F4}"; }
     
     public double ZoomLevel { get; set; } = 0.5d;
     public double CenterX { get; set; } = -1d;

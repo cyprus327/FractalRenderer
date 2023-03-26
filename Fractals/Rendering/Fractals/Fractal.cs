@@ -6,6 +6,7 @@ internal abstract class Fractal : IDisposable {
     public abstract void HandleInput(double d, OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState k);
 
     public abstract int Handle { get; init; }
+    public abstract string Info { get; }
 
     public static void Initialize(string fragCode, out int handle, bool showLogs = false, bool use = true) {
         int vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
