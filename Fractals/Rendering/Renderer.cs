@@ -29,6 +29,7 @@ internal sealed class Renderer : GameWindow {
     private Julia julia;
     private BurningShip burningShip;
     private Multibrot multibrot;
+    private Mandelbulb mandelbulb;
 
     protected override void OnLoad() {
         base.OnLoad();
@@ -70,8 +71,9 @@ internal sealed class Renderer : GameWindow {
         julia = new Julia(this.ClientSize.X, this.ClientSize.Y, true);
         burningShip = new BurningShip(this.ClientSize.X, this.ClientSize.Y, true);
         multibrot = new Multibrot(this.ClientSize.X, this.ClientSize.Y, true);
+        mandelbulb = new Mandelbulb(this.ClientSize.X, this.ClientSize.Y, true);
 
-        currentFractal = multibrot;
+        currentFractal = mandelbrot;
     }
 
     protected override void OnUnload() {
@@ -121,6 +123,7 @@ internal sealed class Renderer : GameWindow {
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D2)) currentFractal = julia;
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D3)) currentFractal = burningShip;
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D4)) currentFractal = multibrot;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D5)) currentFractal = mandelbulb;
 
         string fps = $"FPS: {1 / args.Time:F0}";
         this.Title = $"{currentFractal.GetType().Name} | {currentFractal.Info} | {fps}";
