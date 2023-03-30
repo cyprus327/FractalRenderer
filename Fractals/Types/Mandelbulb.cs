@@ -1,10 +1,11 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Fractals.Rendering;
+using OpenTK.Graphics.OpenGL4;
 
-namespace Fractals.Rendering;
+namespace Fractals.Types;
 
 internal sealed class Mandelbulb : Fractal {
-    public Mandelbulb(int width, int height, bool showLogs = false) {
-        Initialize(Shaders.MandelbulbFragCode, out int handle, showLogs, true);
+    public Mandelbulb(int width, int height) {
+        Initialize(Shaders.MandelbulbFragCode, out int handle);
         Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");
@@ -18,14 +19,12 @@ internal sealed class Mandelbulb : Fractal {
 
         maxIterUniformLocation = GL.GetUniformLocation(Handle, "MaxIter");
         GL.Uniform1(maxIterUniformLocation, MaxIterations);
-
-
     }
 
     public override int Handle { get; init; }
     public override string Info { get => $"I: {MaxIterations}, R: ({RotX:F2}, {RotY:F2}, {RotZ:F2}), Z: {ZoomLevel:F4}"; }
 
-    public float ZoomLevel { get; set; } = 0.5f;
+    public float ZoomLevel { get; set; } = 1f;
     public float RotX { get; set; } = 0f;
     public float RotY { get; set; } = 0f;
     public float RotZ { get; set; } = 0f;
@@ -43,9 +42,15 @@ internal sealed class Mandelbulb : Fractal {
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R))
             ZoomLevel = 1f;
 
-        //RotX += (float)deltaTime / 3f;
-        RotY += (float)deltaTime / 5f;
-        //RotZ += (float)deltaTime / 3f;
+        if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
+            RotX -= (float)deltaTime / 3f;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.S))
+            RotX += (float)deltaTime / 3f;
+        if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D))
+            RotY += (float)deltaTime / 3f;
+        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.A))
+            RotY -= (float)deltaTime / 3f;
+
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Z))
             MaxIterations -= 1;

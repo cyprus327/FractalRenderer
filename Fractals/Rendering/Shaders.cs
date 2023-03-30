@@ -91,7 +91,7 @@ internal static class Shaders {
         uniform double Zoom;
         uniform dvec2 Center;
         uniform int MaxIter;
-        
+
         in vec2 Resolution;
 
         out vec4 fragColor;
@@ -140,6 +140,8 @@ internal static class Shaders {
 
     public static readonly string MandelbulbFragCode = @"
         #version 410
+        
+        precision highp float;
 
         uniform float Zoom;
         uniform int MaxIter;
@@ -219,7 +221,7 @@ internal static class Shaders {
         }
 
         vec3 calcNormal(vec3 p) {
-            vec3 eps = vec3(0.001, 0.0, 0.0);
+            vec3 eps = vec3(0.000001, 0.0, 0.0);
             float d = DE(p) * Zoom;
             float dx = DE(p + eps.xyy) - d;
             float dy = DE(p + eps.yxy) - d;
@@ -247,8 +249,8 @@ internal static class Shaders {
             );
             mat3 rotationMatrix = rotX * rotY * rotZ;
 
-            vec3 rayOrigin = vec3(0.0, 0.0, -3.0) * rotationMatrix; // Apply rotation to camera position
-            vec3 rayDir = normalize(vec3(uv, 1.0) * rotationMatrix); // Apply rotation to ray direction
+            vec3 rayOrigin = vec3(0.0, 0.0, -3.0) * rotationMatrix;
+            vec3 rayDir = normalize(vec3(uv, 1.0) * rotationMatrix);
 
             vec3 color = vec3(0.0);
             float t = 0.0;
@@ -262,7 +264,12 @@ internal static class Shaders {
                     vec3 reflectedDir = reflect(-lightDir, n);
                     vec3 viewDir = normalize(-p);
                     float specular = pow(max(dot(reflectedDir, viewDir), 0.0), SPECULAR_EXPONENT);
-                    color = AMBIENT_COLOR + diffuse * DIFFUSE_COLOR + specular * SPECULAR_COLOR;
+                    color = vec3(
+                        0.5 + 2.5 * cos(3.0 + float(i) * 0.2),
+                        0.5 + 2.5 * cos(1.0 + float(i) * 0.3),
+                        0.5 + 2.5 * cos(5.0 + float(i) * 0.4)
+                    );
+                    color = AMBIENT_COLOR + diffuse * color * DIFFUSE_COLOR + specular * SPECULAR_COLOR;
                     break;
                 }
                 t += d;

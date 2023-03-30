@@ -1,8 +1,7 @@
 ﻿using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenTK.Graphics.OpenGL4;
-using System.Reflection;
-using OpenTK.Mathematics;
+using Fractals.Types;
 
 namespace Fractals.Rendering;
 
@@ -67,11 +66,11 @@ internal sealed class Renderer : GameWindow {
 
         GL.BindVertexArray(0);
 
-        mandelbrot = new Mandelbrot(this.ClientSize.X, this.ClientSize.Y, true);
-        julia = new Julia(this.ClientSize.X, this.ClientSize.Y, true);
-        burningShip = new BurningShip(this.ClientSize.X, this.ClientSize.Y, true);
-        multibrot = new Multibrot(this.ClientSize.X, this.ClientSize.Y, true);
-        mandelbulb = new Mandelbulb(this.ClientSize.X, this.ClientSize.Y, true);
+        mandelbrot = new Mandelbrot(this.ClientSize.X, this.ClientSize.Y);
+        julia = new Julia(this.ClientSize.X, this.ClientSize.Y);
+        burningShip = new BurningShip(this.ClientSize.X, this.ClientSize.Y);
+        multibrot = new Multibrot(this.ClientSize.X, this.ClientSize.Y);
+        mandelbulb = new Mandelbulb(this.ClientSize.X, this.ClientSize.Y);
 
         currentFractal = mandelbrot;
     }
@@ -91,6 +90,8 @@ internal sealed class Renderer : GameWindow {
         mandelbrot?.Dispose();
         julia?.Dispose();
         burningShip?.Dispose();
+        multibrot?.Dispose();
+        mandelbulb?.Dispose();
     }
 
     protected override void OnResize(ResizeEventArgs e) {
