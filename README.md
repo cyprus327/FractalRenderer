@@ -4,6 +4,8 @@
 - Burning Ship
 - The Multibrots
 - The Mandelbulb
+### Example video showing off a little of everything
+https://streamable.com/738frg
 ### Example video of a Mandelbrot zoom and messing around with Julia constants
 https://streamable.com/jaijdj
 ## Keybinds: 
