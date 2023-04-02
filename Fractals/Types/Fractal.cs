@@ -1,14 +1,17 @@
 ﻿using Fractals.Rendering;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Fractals.Types;
 
 internal abstract class Fractal : IDisposable {
-    public abstract void HandleInput(double d, OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState k);
+    public abstract void HandleInput(double d, KeyboardState k, MouseState m);
 
     public abstract int Handle { get; init; }
     public abstract string Info { get; }
 
+    private bool disposed = false;
+    
     public static void Initialize(string fragCode, out int handle) {
         int vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertShaderHandle, Shaders.VertexCode);
@@ -45,7 +48,16 @@ internal abstract class Fractal : IDisposable {
         GL.UseProgram(handle);
     }
 
-    private bool disposed = false;
+    public void GetMouseDelta(MouseState state, out float dx, out float dy) {
+        if (state.IsButtonDown(MouseButton.Button1)) {
+            dx = state.Delta.X;
+            dy = state.Delta.Y;
+        }
+        else {
+            dx = 0;
+            dy = 0;
+        }
+    }
 
     ~Fractal() {
         Dispose();

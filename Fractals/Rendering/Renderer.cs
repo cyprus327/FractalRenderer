@@ -118,7 +118,7 @@ internal sealed class Renderer : GameWindow {
 
         var keyboardState = this.KeyboardState;
 
-        currentFractal.HandleInput(args.Time, this.KeyboardState);
+        currentFractal.HandleInput(args.Time, this.KeyboardState, this.MouseState);
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D1)) currentFractal = mandelbrot;
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D2)) currentFractal = julia;

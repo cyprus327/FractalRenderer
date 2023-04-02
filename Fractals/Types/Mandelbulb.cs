@@ -1,5 +1,6 @@
 ﻿using Fractals.Rendering;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Fractals.Types;
 
@@ -34,13 +35,17 @@ internal sealed class Mandelbulb : Fractal {
     private readonly int rotationUniformLocation;
     private readonly int maxIterUniformLocation;
 
-    public override void HandleInput(double deltaTime, OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState keyboardState) {
+    public override void HandleInput(double deltaTime, KeyboardState keyboardState, MouseState mouseState) {
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.E))
             ZoomLevel *= (float)Math.Pow(2, deltaTime);
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Q))
             ZoomLevel *= (float)Math.Pow(0.5, deltaTime);
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R))
             ZoomLevel = 1f;
+
+        GetMouseDelta(mouseState, out float dx, out float dy);
+        RotX += dy / ZoomLevel * 0.002f;
+        RotY += dx / ZoomLevel * 0.002f;
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
             RotX -= (float)deltaTime / 3f;

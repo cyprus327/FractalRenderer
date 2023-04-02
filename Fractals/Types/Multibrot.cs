@@ -1,5 +1,6 @@
 ﻿using Fractals.Rendering;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Fractals.Types;
 
@@ -38,7 +39,7 @@ internal sealed class Multibrot : Fractal {
     private readonly int maxIterUniformLocation;
     private readonly int powerUniformLocation;
 
-    public override void HandleInput(double deltaTime, OpenTK.Windowing.GraphicsLibraryFramework.KeyboardState keyboardState) {
+    public override void HandleInput(double deltaTime, KeyboardState keyboardState, MouseState mouseState) {
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.E))
             ZoomLevel *= Math.Pow(2, deltaTime);
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Q))
@@ -46,14 +47,9 @@ internal sealed class Multibrot : Fractal {
         else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.R))
             ZoomLevel = 1f;
 
-        if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
-            CenterY += deltaTime / ZoomLevel;
-        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.S))
-            CenterY -= deltaTime / ZoomLevel;
-        if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.A))
-            CenterX -= deltaTime / ZoomLevel;
-        else if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D))
-            CenterX += deltaTime / ZoomLevel;
+        GetMouseDelta(mouseState, out float dx, out float dy);
+        CenterX -= dx / ZoomLevel * 0.002;
+        CenterY += dy / ZoomLevel * 0.002;
 
         if (keyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Z))
             MaxIterations -= (int)(deltaTime * MaxIterations);
