@@ -2,6 +2,14 @@
 
 This is a fractal renderer made in C# with OpenTK.
 
+## Features:
+
+- Realtime rendering.
+- All fractals state's are saved.
+- Renders all of the below fractals (except for the Mandelbulb) with 64 bit precision.
+- Supports zooming and panning.
+- Uses the GPU instead of the CPU.
+
 ## Current supported fractals:
 
 - The Mandelbrot Set
@@ -9,13 +17,6 @@ This is a fractal renderer made in C# with OpenTK.
 - Burning Ship
 - The Multibrots
 - The Mandelbulb
-
-## Features:
-
-- Realtime rendering.
-- Renders all of the above fractals (except for the Mandelbulb) with 64 bit precision.
-- Supports zooming and panning.
-- Uses the GPU instead of the CPU.
 
 ### Example video showing off a little of everything
 https://streamable.com/738frg
