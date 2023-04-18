@@ -1,4 +1,4 @@
-﻿using Fractals.Rendering;
+﻿using Fractals.Rendering.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -6,7 +6,8 @@ namespace Fractals.Types;
 
 internal sealed class BurningShip : Fractal {
     public BurningShip(int width, int height) {
-        Initialize(Shaders.BurningShipFragCode, out int handle);
+        string shaderPath = @"../../../Rendering/Shaders/burningShipFrag.glsl";
+        Initialize(ShaderReader.ReadToString(shaderPath), out int handle);
         Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");

@@ -1,4 +1,5 @@
 ﻿using Fractals.Rendering;
+using Fractals.Rendering.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -6,7 +7,8 @@ namespace Fractals.Types;
 
 internal sealed class Multibrot : Fractal {
     public Multibrot(int width, int height) {
-        Initialize(Shaders.MultibrotFragCode, out int handle);
+        string shaderPath = @"../../../Rendering/Shaders/multibrotFrag.glsl";
+        Initialize(ShaderReader.ReadToString(shaderPath), out int handle);
         Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");

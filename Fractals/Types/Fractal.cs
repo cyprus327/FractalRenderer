@@ -1,4 +1,4 @@
-﻿using Fractals.Rendering;
+﻿using Fractals.Rendering.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -14,7 +14,8 @@ internal abstract class Fractal : IDisposable {
     
     public static void Initialize(string fragCode, out int handle) {
         int vertShaderHandle = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertShaderHandle, Shaders.VertexCode);
+        string vertShaderPath = @"../../../Rendering/Shaders/vertShader.glsl";
+        GL.ShaderSource(vertShaderHandle, ShaderReader.ReadToString(vertShaderPath));
         GL.CompileShader(vertShaderHandle);
 
         string vertShaderInfoLog = GL.GetShaderInfoLog(vertShaderHandle);

@@ -1,12 +1,15 @@
 ﻿using Fractals.Rendering;
+using Fractals.Rendering.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Runtime.CompilerServices;
 
 namespace Fractals.Types;
 
 internal sealed class Mandelbulb : Fractal {
     public Mandelbulb(int width, int height) {
-        Initialize(Shaders.MandelbulbFragCode, out int handle);
+        string shaderPath = @"../../../Rendering/Shaders/mandelbulbFrag.glsl";
+        Initialize(ShaderReader.ReadToString(shaderPath), out int handle);
         Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");
@@ -28,7 +31,7 @@ internal sealed class Mandelbulb : Fractal {
     public float ZoomLevel { get; set; } = 1f;
     public float RotX { get; set; } = 0f;
     public float RotY { get; set; } = 0f;
-    public float RotZ { get; set; } = 0f;
+    public float RotZ { get; set; } = 0f; 
     public int MaxIterations { get; set; } = 150;
 
     private readonly int zoomUniformLocation;

@@ -1,4 +1,5 @@
 ﻿using Fractals.Rendering;
+using Fractals.Rendering.Shaders;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -6,7 +7,8 @@ namespace Fractals.Types;
 
 internal sealed class Julia : Fractal {
     public Julia(int width, int height) {
-        Initialize(Shaders.JuliaFragCode, out int handle);
+        string shaderPath = @"../../../Rendering/Shaders/juliaFrag.glsl";
+        Initialize(ShaderReader.ReadToString(shaderPath), out int handle);
         Handle = handle;
 
         int viewportLocation = GL.GetUniformLocation(Handle, "ViewportSize");
