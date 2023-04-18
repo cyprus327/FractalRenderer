@@ -10,13 +10,13 @@ https://streamable.com/738frg
 https://streamable.com/jaijdj
 ## Keybinds: 
 ### For all other than Mandelbulb:
-- WASD to move
+- Left click and move the mouse to move
 - Q to zoom out
 - E to zoom in
 - Z to decrease max iterations
 - X to increase max iterations
 ### For Mandelbulb:
-- WASD to rotate
+- WASD or the mouse to rotate
 - Q to zoom out
 - E to zoom in
 ### Additional keybinds for Julia
