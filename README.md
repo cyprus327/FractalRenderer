@@ -5,7 +5,7 @@ This is a fractal renderer made in C# with OpenTK.
 ## Features:
 
 - Realtime rendering.
-- All fractals state's are saved.
+- All fractal's states are saved.
 - Renders all of the below fractals (except for the Mandelbulb) with 64 bit precision.
 - Supports zooming and panning.
 - Uses the GPU instead of the CPU.
