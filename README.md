@@ -45,7 +45,7 @@ Power: ~3.0
 Power: ~7.0
 ![Multibrot 7.0](https://github.com/cyprus327/FractalRenderer/assets/76965606/43984f58-a381-45d1-a003-773b30fe8067)
 
-- Mandelbulb
+- Mandelbulb (see [Raymarching](https://github.com/cyprus327/Raymarching) for a much better render)
 
 ![Mandelbulb Base](https://github.com/cyprus327/FractalRenderer/assets/76965606/9087c8b0-1f75-4327-8f12-d7473e65a881)
 ![Mandelbulb Surface](https://github.com/cyprus327/FractalRenderer/assets/76965606/303e4f68-8832-4f8f-b6f4-eb56ca547fc2)
